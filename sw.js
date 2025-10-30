@@ -1,10 +1,15 @@
-//Creamos una variable para el nombre del caché
-const CACHE_NAME = 'mi-cache-V1_PWA';
-//Archivos a crear
+
+const CACHE_NAME = 'mi-cache-v1-pwa-cv';
+
+
 const urlsToCache = [
     './',
-    './js/main.js',
-    './js/manifest.js',
+    './index.html',
+    './main.js',
+    './manifest.json', 
+    './style/style.css', 
+    './imagen/yo.JPG', 
+    './formulario.html', 
     './img/ACTECH Logo-16x16.png',
     './img/ACTECH Logo-32x32.png',
     './img/ACTECH Logo-64x64.png',
@@ -22,6 +27,7 @@ self.addEventListener('install', event => {
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => {
+                console.log('Cache abierto, agregando archivos...');
                 return cache.addAll(urlsToCache);
             })
             .catch(err => {
@@ -30,42 +36,40 @@ self.addEventListener('install', event => {
     );
 });
 
-//Evento Activate
+// Evento activate (Sintaxis corregida)
 self.addEventListener('activate', e => {
     const cacheWhiteList = [CACHE_NAME];
+
     e.waitUntil(
         caches.keys().then(cacheNames => {
             return Promise.all(
                 cacheNames.map(cacheName => {
-                    if(cacheWhiteList.indexOf(cacheName) === -1){
+                    if (cacheWhiteList.indexOf(cacheName) === -1) {
                         return caches.delete(cacheName);
                     }
-
                 })
             );
-        }
-    )
-    ,then(() => {
-        self.clients.claim();
-    })
-);
+        })
+        .then(() => {
+            console.log('Cache limpio y SW activado');
+            return self.clients.claim();
+        })
+    );
 });
 
-
-// Evento Fetch
+// Evento fetch (Estrategia: Cache first)
 self.addEventListener('fetch', e => {
     e.respondWith(
         caches.match(e.request)
         .then(response => {
-            if(response){
+            if (response) {
                 return response;
             }
+          
             return fetch(e.request);
         })
     );
-})
-
-
+});
 
 
 
